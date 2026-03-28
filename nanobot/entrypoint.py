@@ -17,7 +17,8 @@ def main():
     config_path = config_dir / "config.json"
     resolved_path = config_dir / "config.resolved.json"
     workspace_dir = config_dir / "workspace"
-    venv_bin = config_dir / ".venv" / "bin"
+    # venv is at /app/.venv (workspace root), not /app/nanobot/.venv
+    venv_bin = Path("/app/.venv") / "bin"
 
     # Ensure venv bin is in PATH
     os.environ["PATH"] = str(venv_bin) + os.pathsep + os.environ.get("PATH", "")

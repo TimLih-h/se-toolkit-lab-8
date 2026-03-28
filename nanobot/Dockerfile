@@ -4,34 +4,17 @@ FROM ${REGISTRY_PREFIX_DOCKER_HUB}astral/uv:python3.14-bookworm-slim AS builder
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 ENV UV_PYTHON_DOWNLOADS=0
 
+# Copy entire workspace root
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+COPY nanobot/ ./nanobot/
+COPY mcp/ ./mcp/
+COPY nanobot-websocket-channel/ ./nanobot-websocket-channel/
+
+# Change to nanobot directory and sync
 WORKDIR /app/nanobot
-
-# Copy nanobot project files
-COPY pyproject.toml ./
-COPY entrypoint.py ./
-COPY config.json ./
-
-# Install base nanobot-ai dependency
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system "nanobot-ai @ https://github.com/HKUDS/nanobot/archive/e7d371ec1e6531b28898ec2c869ef338e8dd46ec.zip"
-
-# Copy and install workspace dependencies
-COPY ../mcp/mcp-lms /app/mcp/mcp-lms
-COPY ../nanobot-websocket-channel/nanobot-webchat /app/nanobot-websocket-channel/nanobot-webchat
-COPY ../nanobot-websocket-channel/mcp-webchat /app/nanobot-websocket-channel/mcp-webchat
-COPY ../nanobot-websocket-channel/nanobot-channel-protocol /app/nanobot-websocket-channel/nanobot-channel-protocol
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -e /app/mcp/mcp-lms
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -e /app/nanobot-websocket-channel/nanobot-channel-protocol
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -e /app/nanobot-websocket-channel/nanobot-webchat
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -e /app/nanobot-websocket-channel/mcp-webchat
+    uv sync --frozen
 
 # ---
 # Stage 2: final image
@@ -50,11 +33,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends gosu && rm -rf 
 RUN groupadd --system --gid 999 nonroot \
     && useradd --system --gid 999 --uid 999 --create-home nonroot
 
-# Copy the application from the builder
+# Copy the entire workspace from builder
 COPY --from=builder --chown=nonroot:nonroot /app /app
 
 # Set PATH to include venv
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/nanobot/.venv/bin:$PATH"
 
 WORKDIR /app/nanobot
 
