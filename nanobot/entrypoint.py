@@ -96,6 +96,23 @@ def main():
             },
         }
 
+    # Observability MCP server (VictoriaLogs and VictoriaTraces)
+    config["tools"]["mcpServers"]["mcp_obs"] = {
+        "command": "python",
+        "args": ["-m", "mcp_obs"],
+        "env": {
+            # Use NANOBOT_* env vars from docker-compose.yml, falling back to direct URLs
+            "VICTORIALOGS_URL": os.environ.get(
+                "NANOBOT_VICTORIALOGS_URL",
+                os.environ.get("VICTORIALOGS_URL", "http://victorialogs:9428")
+            ),
+            "VICTORIATRACES_URL": os.environ.get(
+                "NANOBOT_VICTORIATRACES_URL",
+                os.environ.get("VICTORIATRACES_URL", "http://victoriatraces:10428")
+            ),
+        },
+    }
+
     # Write resolved config
     with open(resolved_path, "w") as f:
         json.dump(config, f, indent=2)
