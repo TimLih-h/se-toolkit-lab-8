@@ -51,6 +51,7 @@
                     ${pkgs.lib.getExe pkgs.lychee} \
                       --include-fragments \
                       --offline \
+                      --max-cache-age 0d \
                       --no-progress \
                       --exclude-path '.venv' \
                       --exclude-path '.uv-cache' \
