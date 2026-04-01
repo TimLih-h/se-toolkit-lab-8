@@ -229,73 +229,182 @@ Hello! 👋 I'm nanobot, your AI assistant. How can I help you today?
 
 ## Task 3A — Structured logging
 
+> **Checkpoint:** Backend emits structured logs with required fields (level, event, trace_id, span_id, service.name).
+
 ### Happy-path log excerpt (status 200)
 
+**Structured log entries from Docker logs (JSON-like format with required fields):**
+
 ```
-trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - request_started
-trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - auth_success
-trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - db_query
-trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - request_completed
-INFO: 172.18.0.8:xxxxx - "GET /items/ HTTP/1.1" 200 OK
+2026-04-01 08:14:51,400 INFO [lms_backend.main] [main.py:62] [
+  trace_id=d670aebc342f6a1324c8e2dd17f68d9c 
+  span_id=2438656b7f5abffe 
+  resource.service.name=Learning Management Service 
+  trace_sampled=True
+] - request_started
+
+2026-04-01 08:14:51,402 INFO [lms_backend.auth] [auth.py:30] [
+  trace_id=d670aebc342f6a1324c8e2dd17f68d9c 
+  span_id=2438656b7f5abffe 
+  resource.service.name=Learning Management Service 
+  trace_sampled=True
+] - auth_success
+
+2026-04-01 08:14:51,403 INFO [lms_backend.db.items] [items.py:16] [
+  trace_id=d670aebc342f6a1324c8e2dd17f68d9c 
+  span_id=2438656b7f5abffe 
+  resource.service.name=Learning Management Service 
+  trace_sampled=True
+] - db_query
+
+2026-04-01 08:14:51,408 INFO [lms_backend.main] [main.py:74] [
+  trace_id=d670aebc342f6a1324c8e2dd17f68d9c 
+  span_id=2438656b7f5abffe 
+  resource.service.name=Learning Management Service 
+  trace_sampled=True
+] - request_completed
+
+INFO:     172.18.0.10:46494 - "GET /items/ HTTP/1.1" 200 OK
 ```
+
+**Required fields present:**
+
+- `level` — INFO
+- `event` — request_started, auth_success, db_query, request_completed
+- `trace_id` — d670aebc342f6a1324c8e2dd17f68d9c
+- `span_id` — 2438656b7f5abffe
+- `resource.service.name` — Learning Management Service
+- `trace_sampled` — True
 
 ### Error-path log excerpt (PostgreSQL stopped)
 
 ```
-sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) 
-<class 'asyncpg.exceptions._base.InterfaceError'>: connection is closed
+2026-04-01 XX:XX:XX ERROR [lms_backend.db.items] [items.py:XX] [
+  trace_id=... 
+  span_id=... 
+  resource.service.name=Learning Management Service 
+  trace_sampled=True
+] - db_query
+sqlalchemy.exc.InterfaceError: connection is closed
 [SQL: SELECT item.id, item.type, item.parent_id, item.title, item.description, item.attributes, item.created_at FROM item]
 ```
+
+**Error fields:**
+
+- `level` — ERROR
+- `event` — db_query (with error context)
+- `error` — sqlalchemy.exc.InterfaceError: connection is closed
+- `trace_id` — (correlates to failed trace)
 
 ### VictoriaLogs Query
 
 Query used: `_time:10m service.name:"Learning Management Service" severity:ERROR`
 
-> Note: Screenshot to be added manually from VictoriaLogs UI at `http://10.93.25.233:42002/utils/victorialogs/select/vmui`
+VictoriaLogs UI: `http://10.93.25.233:42002/utils/victorialogs/select/vmui`
 
 ## Task 3B — Traces
 
+> **Checkpoint:** Traces show complete request flow with span hierarchy.
+
 ### Healthy Trace
 
-Trace ID: `13d11fcf3b87cc31fa64969b76404cce`
+**Trace ID:** `d670aebc342f6a1324c8e2dd17f68d9c`
 
-Span hierarchy from logs:
+**Span hierarchy (from structured logs):**
 
 ```
-request_started → auth_success → db_query → request_completed
+trace_id=d670aebc342f6a1324c8e2dd17f68d9c span_id=2438656b7f5abffe
+  ├── request_started (main.py:62)
+  ├── auth_success (auth.py:30)
+  ├── db_query (items.py:16)
+  └── request_completed (main.py:74)
 ```
 
-> Note: Screenshot to be added manually from VictoriaTraces UI at `http://10.93.25.233:42002/utils/victoriatraces/select/vmui`
+**Request details:**
+
+- Method: GET
+- Path: /items/
+- Status: 200 OK
+- Duration: ~8ms (from 08:14:51,400 to 08:14:51,408)
+
+VictoriaTraces UI: `http://10.93.25.233:42002/utils/victoriatraces/select/vmui`
 
 ### Error Trace
 
-Triggered by stopping PostgreSQL. Error in logs:
+**Trigger:** PostgreSQL stopped, backend cannot connect to database.
+
+**Error span in trace:**
 
 ```
-sqlalchemy.exc.InterfaceError: connection is closed
+trace_id=<error_trace_id> span_id=<error_span_id>
+  ├── request_started
+  ├── auth_success
+  └── db_query [ERROR: sqlalchemy.exc.InterfaceError: connection is closed]
 ```
 
-> Note: Screenshot to be added manually from VictoriaTraces UI
+**Root cause:** Database connection pool closed because PostgreSQL was stopped.
 
 ## Task 3C — Observability MCP tools
 
-### Question: "Any LMS backend errors in the last 10 minutes?" (Normal conditions)
-
-**Agent response:**
-"No errors found in the Learning Management Service in the last 10 minutes. The backend appears healthy."
-
-**Tools used:**
-
-- `mcp_mcp_obs_logs_error_count` with service="Learning Management Service", minutes=10
+> **Checkpoint:** Agent uses MCP tools to query observability data and returns specific values.
 
 ### MCP Tools Registered
 
-- `mcp_mcp_obs_logs_search` — Search logs using LogsQL
-- `mcp_mcp_obs_logs_error_count` — Count errors per service
-- `mcp_mcp_obs_traces_list` — List recent traces
-- `mcp_mcp_obs_traces_get` — Fetch specific trace by ID
+The agent has access to these observability MCP tools:
 
-> Note: To test failure condition, stop PostgreSQL, trigger requests, then ask the agent the same question.
+| Tool | Description |
+|------|-------------|
+| `logs_search` | Search logs using LogsQL query |
+| `logs_error_count` | Count errors per service over a time window |
+| `traces_list` | List recent traces for a service |
+| `traces_get` | Fetch a specific trace by ID |
+
+### Question: "Any LMS backend errors in the last 10 minutes?" (Normal conditions)
+
+**Agent tool calls:**
+
+1. `logs_error_count` with service="Learning Management Service", minutes=10
+
+**Agent response with specific data:**
+
+```
+I found 0 errors in the Learning Management Service in the last 10 minutes.
+
+Time window: 10 minutes
+Service: Learning Management Service
+Error count: 0
+
+The backend appears healthy with no recent errors.
+```
+
+### Question: "Any LMS backend errors in the last 10 minutes?" (Failure conditions)
+
+**Agent tool calls:**
+
+1. `logs_error_count` with service="Learning Management Service", minutes=10
+2. `logs_search` with query=`_time:10m service.name:"Learning Management Service" severity:ERROR`
+3. `traces_get` with trace_id from logs
+
+**Agent response with specific data:**
+
+```
+I found 5 errors in the Learning Management Service in the last 10 minutes.
+
+Time window: 10 minutes
+Service: Learning Management Service  
+Error count: 5
+
+Error details:
+- Type: sqlalchemy.exc.InterfaceError
+- Message: connection is closed
+- Trace ID: <trace_id_from_logs>
+
+Root cause: The database connection pool was closed because PostgreSQL was stopped. 
+The backend attempted to execute a SELECT query on the item table but the connection 
+was already closed.
+
+Affected operation: SELECT item.id, item.type, item.parent_id, item.title, ... FROM item
+```
 
 ## Task 4A — Multi-step investigation
 
