@@ -27,12 +27,13 @@ async def read_items(session: AsyncSession) -> list[ItemRecord]:
                 "table": "item",
                 "operation": "select",
                 "error": str(exc),
+                "error_type": type(exc).__name__,
             },
         )
         raise
 
 
-async def read_item(session: AsyncSession, item_id: int) -> ItemRecord | None:
+async def read_item(session: AsyncSession, item_id: int) -> ItemRecord | None:  
     """Read a single item by id."""
     return await session.get(ItemRecord, item_id)
 
@@ -46,7 +47,7 @@ async def create_item(
 ) -> ItemRecord:
     """Create a new item in the database."""
     item = ItemRecord(
-        type=type, parent_id=parent_id, title=title, description=description
+        type=type, parent_id=parent_id, title=title, description=description    
     )
     session.add(item)
     await session.commit()
