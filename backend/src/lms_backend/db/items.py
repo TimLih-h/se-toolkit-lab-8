@@ -20,6 +20,7 @@ async def read_items(session: AsyncSession) -> list[ItemRecord]:
         result = await session.exec(select(ItemRecord))
         return list(result.all())
     except Exception as exc:
+        # Task 4: Bug fix — include error_type for better debugging
         logger.error(
             "db_query",
             extra={
