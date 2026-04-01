@@ -4,75 +4,133 @@ Paste your checkpoint evidence below. Add screenshots as image files in the repo
 
 ## Task 1A — Bare agent
 
+> **Checkpoint commands:**
+>
+> ```bash
+> ssh root@10.93.25.233
+> cd /root/se-toolkit-lab-8/nanobot
+> /root/.local/bin/uv run nanobot agent --logs --session cli:task1a-loop -c ./config.json -m "What is the agentic loop?"
+> /root/.local/bin/uv run nanobot agent --logs --session cli:task1a-labs -c ./config.json -m "What labs are available in our LMS?"
+> ```
+
 ### Question 1: "What is the agentic loop?"
 
-**Answer:**
-The agentic loop is the fundamental cycle that autonomous AI agents follow to accomplish tasks. It's the core reasoning and action pattern that enables agents to work independently toward goals.
+**Raw agent response (copy-pasted from terminal):**
 
-**The Basic Loop:**
+```
+The agentic loop is the core reasoning cycle that enables AI agents to act autonomously. It's the continuous process of:
 
-1. **Perceive** — Gather information about the current state (read files, check outputs, observe environment)
-2. **Reason/Plan** — Analyze the situation, decide what to do next, form a plan or sub-goal
-3. **Act** — Execute an action using available tools (run commands, write files, make API calls, send messages)
-4. **Observe** — Collect feedback from the action's result (success, error, output)
-5. **Repeat** — Continue the loop until the goal is achieved or a stopping condition is met
+The Cycle
 
-**Why It Matters:**
+ ┌─────────────┐
+ │  Perceive   │ ← Observe the environment/state
+ └──────┬──────┘
+        │
+        ▼
+ ┌─────────────┐
+ │   Reason    │ ← Analyze, plan, decide
+ └──────┬──────┘
+        │
+        ▼
+ ┌─────────────┐
+ │    Act      │ ← Use tools to take action
+ └──────┬──────┘
+        │
+        ▼
+ ┌─────────────┐
+ │   Observe   │ ← Get feedback from action
+ └──────┬──────┘
+        │
+        └──────→ (loop back to Reason)
 
-- **Autonomy** — Agents can work without constant human guidance
-- **Adaptability** — Agents adjust based on feedback and changing conditions
-- **Complex task completion** — Breaking large goals into iterative steps
-- **Self-correction** — Learning from mistakes and trying alternative approaches
+
+In Practice (for me as nanobot)
+
+ 1 Perceive — Read your question, check available tools, examine files
+ 2 Reason — Understand what you need, plan my response
+ 3 Act — Send my answer, run commands, or modify files
+ 4 Observe — See the result (your follow-up, command output, etc.)
+ 5 Repeat — Continue until the task is complete
+
+Key Properties
+
+ • Iterative — Multiple passes may be needed for complex tasks
+ • Feedback-driven — Each action informs the next decision
+ • Goal-oriented — The loop continues until the objective is met
+ • Self-correcting — Errors lead to adjusted strategies
+
+This loop is what makes an AI an agent rather than just a chatbot—agents can    
+take actions in the world and adapt based on outcomes.
+```
 
 ### Question 2: "What labs are available in our LMS?"
 
-**Answer:**
-The agent explored the workspace and found:
+**Raw agent response (copy-pasted from terminal):**
 
-**Lab 8 — The Agent is the Interface**
+```
+Here are the available labs in the LMS:
 
-Required Tasks:
 
-1. Task 1: Set Up the Agent — install nanobot, configure Qwen API, add MCP tools, write skill prompt
-2. Task 2: Deploy and Connect a Web Client — Dockerize nanobot, add WebSocket channel + Flutter chat UI
-3. Task 3: Give the Agent New Eyes — explore observability data, write log/trace MCP tools
-4. Task 4: Diagnose a Failure and Make the Agent Proactive — investigate a failure, schedule in-chat health checks, fix a planted bug
+ ID  Title
+ ───────────────────────────────────────────────────────────
+ 1   Lab 01 – Products, Architecture & Roles
+ 2   Lab 02 — Run, Fix, and Deploy a Backend Service
+ 3   Lab 03 — Backend API: Explore, Debug, Implement, Deploy
+ 4   Lab 04 — Testing, Front-end, and AI Agents
+ 5   Lab 05 — Data Pipeline and Analytics Dashboard
+ 6   Lab 06 — Build Your Own Agent
+ 7   Lab 07 — Build a Client with an AI Coding Agent
+ 8   lab-08
 
-Optional Tasks:
 
-1. Task 1: Add a Telegram Bot Client — same agent, different interface
+Would you like me to show you details about a specific lab, such as pass rates, 
+completion rates, group performance, or top learners?
+```
 
-**LMS System Components:**
-
-- Backend: FastAPI application with routers for items, interactions, and learners
-- Database: PostgreSQL with seeded data
-- Frontend: React dashboard and Flutter web chat UI
-- Infrastructure: Docker Compose with Caddy reverse proxy, pgAdmin, and observability tools
-
-> **Note:** At this stage, the agent has no live LMS backend access. It answers based on local file exploration only.
+> **Note:** The agent is using MCP tools to fetch real data from the LMS backend.
 
 ## Task 1B — Agent with LMS tools
 
+> **Checkpoint commands:**
+>
+> ```bash
+> ssh root@10.93.25.233
+> cd /root/se-toolkit-lab-8/nanobot
+> /root/.local/bin/uv run nanobot agent --logs --session cli:task1b-labs -c ./config.json -m "What labs are available?"
+> /root/.local/bin/uv run nanobot agent --logs --session cli:task1b-health -c ./config.json -m "Is the LMS backend healthy?"
+> ```
+
 ### Question 1: "What labs are available?"
 
-**Answer:**
-Here are the available labs:
+**Raw agent response (copy-pasted from terminal):**
 
-1. Lab 01 – Products, Architecture & Roles
-2. Lab 02 — Run, Fix, and Deploy a Backend Service
-3. Lab 03 — Backend API: Explore, Debug, Implement, Deploy
-4. Lab 04 — Testing, Front-end, and AI Agents
-5. Lab 05 — Data Pipeline and Analytics Dashboard
-6. Lab 06 — Build Your Own Agent
-7. Lab 07 — Build a Client with an AI Coding Agent
-8. lab-08
+```
+Here are the available labs in the LMS:
 
-> **Note:** The agent now uses MCP tools to fetch real data from the LMS backend, not just local file exploration.
+
+ ID  Title
+ ───────────────────────────────────────────────────────────
+ 1   Lab 01 – Products, Architecture & Roles
+ 2   Lab 02 — Run, Fix, and Deploy a Backend Service
+ 3   Lab 03 — Backend API: Explore, Debug, Implement, Deploy
+ 4   Lab 04 — Testing, Front-end, and AI Agents
+ 5   Lab 05 — Data Pipeline and Analytics Dashboard
+ 6   Lab 06 — Build Your Own Agent
+ 7   Lab 07 — Build a Client with an AI Coding Agent
+ 8   lab-08
+
+
+Would you like me to show you details about a specific lab, such as pass rates, 
+completion rates, group performance, or top learners?
+```
 
 ### Question 2: "Is the LMS backend healthy?"
 
-**Answer:**
+**Raw agent response (copy-pasted from terminal):**
+
+```
 Yes, the LMS backend is healthy. It currently has 56 items in the system.
+```
 
 ### MCP Tools Registered
 
@@ -90,23 +148,35 @@ The agent connected to the MCP server and registered 9 tools:
 
 ## Task 1C — Skill prompt
 
+> **Checkpoint command:**
+>
+> ```bash
+> ssh root@10.93.25.233
+> cd /root/se-toolkit-lab-8/nanobot
+> /root/.local/bin/uv run nanobot agent --logs --session cli:task1c-scores -c ./config.json -m "Show me the scores"
+> ```
+
 ### Question: "Show me the scores" (without specifying a lab)
 
-**Answer:**
-The agent responded by first calling `lms_labs` to get the list of available labs, then asked for clarification:
+**Raw agent response (copy-pasted from terminal):**
 
-"Here are the available labs. Which lab would you like to see scores for?
+```
+I'll help you view the scores. First, let me check which labs are available.
 
-1. Lab 01 – Products, Architecture & Roles
-2. Lab 02 — Run, Fix, and Deploy a Backend Service
-3. Lab 03 — Backend API: Explore, Debug, Implement, Deploy
-4. Lab 04 — Testing, Front-end, and AI Agents
-5. Lab 05 — Data Pipeline and Analytics Dashboard
-6. Lab 06 — Build Your Own Agent
-7. Lab 07 — Build a Client with an AI Coding Agent
-8. Lab 08 — lab-08
+Here are the available labs. Which lab would you like to see the scores for?    
 
-Please let me know which lab you'd like to see the pass rates for!"
+ 1 Lab 01 – Products, Architecture & Roles
+ 2 Lab 02 — Run, Fix, and Deploy a Backend Service
+ 3 Lab 03 — Backend API: Explore, Debug, Implement, Deploy
+ 4 Lab 04 — Testing, Front-end, and AI Agents
+ 5 Lab 05 — Data Pipeline and Analytics Dashboard
+ 6 Lab 06 — Build Your Own Agent
+ 7 Lab 07 — Build a Client with an AI Coding Agent
+ 8 Lab 08 — lab-08
+
+Please let me know which lab you're interested in, or I can show you scores for 
+all of them.
+```
 
 ### Skill Prompt Behavior
 
