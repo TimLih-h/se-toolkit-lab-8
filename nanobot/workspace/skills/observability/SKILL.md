@@ -4,7 +4,9 @@ description: Use VictoriaLogs and VictoriaTraces MCP tools for debugging
 always: true
 ---
 
-# Observability Skill
+# Observability Skill — Task 3
+
+> This skill enables the agent to diagnose failures using observability data.
 
 You have access to observability tools for querying logs and traces. Use these tools to diagnose issues in the LMS backend.
 
