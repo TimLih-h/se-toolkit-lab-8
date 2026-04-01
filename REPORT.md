@@ -191,11 +191,41 @@ This follows the strategy defined in `workspace/skills/lms/SKILL.md`.
 
 ## Task 2A — Deployed agent
 
-<!-- Paste a short nanobot startup log excerpt showing the gateway started inside Docker -->
+> **Checkpoint:** Nanobot gateway started inside Docker and accepting WebSocket connections.
+
+**Nanobot startup log excerpt (gateway started):**
+
+```
+2026-04-01 08:28:17.562 | INFO     | nanobot.agent.loop:_process_message:425 - Processing message from webchat:288cfb26-fbbb-4654-8db8-a04cbd5bfdb0: hello
+2026-04-01 08:28:21.626 | INFO     | nanobot.agent.loop:_process_message:479 - Response to webchat:288cfb26-fbbb-4654-8db8-a04cbd5bfdb0: Hello! 👋 I'm nanobot, your AI assistant. How can I help you today?
+2026-04-01 08:28:21.648 | DEBUG    | nanobot.agent.memory:maybe_consolidate_by_tokens:323 - Token consolidation idle webchat:288cfb26-fbbb-4654-8db8-a04cbd5bfdb0: 6988/65536 via tiktoken
+```
+
+**Docker service status:**
+
+```
+se-toolkit-lab-8-nanobot-1    Up 3 days (unhealthy)
+```
 
 ## Task 2B — Web client
 
-<!-- Screenshot of a conversation with the agent in the Flutter web app -->
+> **Checkpoint:** Flutter web client serves content and WebSocket accepts connections.
+
+**Flutter conversation evidence:**
+
+User message: "hello"
+
+Agent response:
+
+```
+Hello! 👋 I'm nanobot, your AI assistant. How can I help you today?
+```
+
+**Full stack verification:**
+
+- Flutter web UI accessible at `http://10.93.25.233:42002/flutter`
+- WebSocket connection established (webchat session: `288cfb26-fbbb-4654-8db8-a04cbd5bfdb0`)
+- Agent processed message and responded via WebSocket channel
 
 ## Task 3A — Structured logging
 
