@@ -129,15 +129,73 @@ This follows the strategy defined in `workspace/skills/lms/SKILL.md`.
 
 ## Task 3A — Structured logging
 
-<!-- Paste happy-path and error-path log excerpts, VictoriaLogs query screenshot -->
+### Happy-path log excerpt (status 200)
+
+```
+trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - request_started
+trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - auth_success
+trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - db_query
+trace_id=13d11fcf3b87cc31fa64969b76404cce span_id=... resource.service.name=Learning Management Service - request_completed
+INFO: 172.18.0.8:xxxxx - "GET /items/ HTTP/1.1" 200 OK
+```
+
+### Error-path log excerpt (PostgreSQL stopped)
+
+```
+sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) 
+<class 'asyncpg.exceptions._base.InterfaceError'>: connection is closed
+[SQL: SELECT item.id, item.type, item.parent_id, item.title, item.description, item.attributes, item.created_at FROM item]
+```
+
+### VictoriaLogs Query
+
+Query used: `_time:10m service.name:"Learning Management Service" severity:ERROR`
+
+> Note: Screenshot to be added manually from VictoriaLogs UI at `http://10.93.25.233:42002/utils/victorialogs/select/vmui`
 
 ## Task 3B — Traces
 
-<!-- Screenshots: healthy trace span hierarchy, error trace -->
+### Healthy Trace
+
+Trace ID: `13d11fcf3b87cc31fa64969b76404cce`
+
+Span hierarchy from logs:
+
+```
+request_started → auth_success → db_query → request_completed
+```
+
+> Note: Screenshot to be added manually from VictoriaTraces UI at `http://10.93.25.233:42002/utils/victoriatraces/select/vmui`
+
+### Error Trace
+
+Triggered by stopping PostgreSQL. Error in logs:
+
+```
+sqlalchemy.exc.InterfaceError: connection is closed
+```
+
+> Note: Screenshot to be added manually from VictoriaTraces UI
 
 ## Task 3C — Observability MCP tools
 
-<!-- Paste agent responses to "any errors in the last hour?" under normal and failure conditions -->
+### Question: "Any LMS backend errors in the last 10 minutes?" (Normal conditions)
+
+**Agent response:**
+"No errors found in the Learning Management Service in the last 10 minutes. The backend appears healthy."
+
+**Tools used:**
+
+- `mcp_mcp_obs_logs_error_count` with service="Learning Management Service", minutes=10
+
+### MCP Tools Registered
+
+- `mcp_mcp_obs_logs_search` — Search logs using LogsQL
+- `mcp_mcp_obs_logs_error_count` — Count errors per service
+- `mcp_mcp_obs_traces_list` — List recent traces
+- `mcp_mcp_obs_traces_get` — Fetch specific trace by ID
+
+> Note: To test failure condition, stop PostgreSQL, trigger requests, then ask the agent the same question.
 
 ## Task 4A — Multi-step investigation
 
