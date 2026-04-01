@@ -92,7 +92,8 @@ services:
     volumes:
       - client-web-react:/output
 
-  # Task 2A — uncomment and adapt this service after you create repo-local nanobot/.
+  # Task 2A — Deploy nanobot agent in Docker with WebSocket channel
+  # Task 2B — Flutter web client connects via WebSocket to nanobot gateway
   nanobot:
     build:
       context: .
