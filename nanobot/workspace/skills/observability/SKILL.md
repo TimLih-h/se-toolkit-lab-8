@@ -19,6 +19,27 @@ You have access to observability tools for querying logs and traces. Use these t
 
 ## Strategy Rules
 
+### When the user asks "What went wrong?" or "Check system health":
+
+**Follow this investigation flow:**
+
+1. **First** call `logs_error_count` with a fresh time window (2-5 minutes)
+   - Service: "Learning Management Service"
+   - Minutes: 2-5 (fresh window)
+
+2. **If errors exist**, call `logs_search` to find specific error details:
+   - Query: `_time:5m service.name:"Learning Management Service" severity:ERROR`
+   - Look for: error messages, exception types, and **trace_id** values
+
+3. **If you find a trace_id in the logs**, call `traces_get` to fetch the full trace
+   - This shows the complete request flow and where it failed
+
+4. **Summarize findings** as a coherent investigation:
+   - Mention the error type found in logs
+   - Reference the trace and where it failed
+   - Name the affected service and operation
+   - Don't dump raw JSON — explain in plain language
+
 ### When the user asks about errors or failures:
 
 1. **First** call `logs_error_count` with the service name and time window to see if there are recent errors
